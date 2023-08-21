@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "heat-strorage-web-app"
+version = "0.1.0"
+description = ""
+authors = ["Erik Weilandt <erik.weilandt+git@gmail.com>"]
+readme = "README.md"
+packages = [{include = "heat_strorage_web_app"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.24.3"
+black = "^23.3.0"
+pandas = "^2.0.2"
+matplotlib = "^3.7.1"
+openpyxl = "^3.1.2"
+streamlit = "^1.23.1"
+vega-datasets = "^0.9.0"
+plotly = "^5.15.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

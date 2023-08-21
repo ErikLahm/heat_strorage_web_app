@@ -1,0 +1,15 @@
+
+.idea
+.idea
+/venv/
+/venv2/
+/target/
+/thermalenergystorage/venv/
+src/main/python/my_app/__pycache__
+thermalenergystorage/venv
+/thermalenergystorage/
+src/.DS_Store
+.DS_Store
+src/main/python/my_app/classes/__pycache__
+src/main/python/my_app/gui/__pycache__
+src/main/python/my_app/backend_calc/__pycache__
