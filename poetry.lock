@@ -1441,21 +1441,6 @@ decorator = ">=3.4.0"
 test = ["flake8 (>=2.4.0)", "isort (>=4.2.2)", "pytest (>=2.2.3)"]
 
 [[package]]
-name = "vega-datasets"
-version = "0.9.0"
-description = "A Python package for offline access to Vega datasets"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "vega_datasets-0.9.0-py3-none-any.whl", hash = "sha256:3d7c63917be6ca9b154b565f4779a31fedce57b01b5b9d99d8a34a7608062a1d"},
-    {file = "vega_datasets-0.9.0.tar.gz", hash = "sha256:9dbe9834208e8ec32ab44970df315de9102861e4cda13d8e143aab7a80d93fc0"},
-]
-
-[package.dependencies]
-pandas = "*"
-
-[[package]]
 name = "watchdog"
 version = "3.0.0"
 description = "Filesystem events monitoring"
@@ -1514,4 +1499,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e5a9199ca6e580c7be48443c58a199d32e5e7dee8caa516d7f881fb2f092d98a"
+content-hash = "8930135e84cd7d86677026b27e2fc0cfe45e016a274d038cb9acd44fdb4d0efd"

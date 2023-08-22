@@ -1,10 +1,5 @@
 import copy
-import os
-import sys
-from typing import Tuple
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+import re
 
 import numpy as np
 import numpy.typing as npt
@@ -17,15 +12,19 @@ from pde_calculations.medium import Medium
 from pde_calculations.sim_enums import InitialStateType, SimType
 from pde_calculations.simulations import (
     base_simulation,
-    calc_mix_power,
+    cooler_simulation,
     heater_simulation,
-    power_to_energy,
 )
 from pde_calculations.vessel import Vessel
-from st_data_loader import df_to_np_temp_mass_array
-from st_plot import plot_sim_results, plotly_raw_data
 from streamlit.elements.number_input import Number
 from streamlit.runtime.uploaded_file_manager import UploadedFile
+from web_application.analysis_calcs import (
+    get_energy_consumption_data,
+    get_in_out_energy_cons,
+    raw_to_df,
+)
+from web_application.st_data_loader import df_to_np_temp_mass_array
+from web_application.st_plot import plot_sim_results, plotly_raw_data
 
 HEADER = "Wärmespeicher Simulation"
 
@@ -48,17 +47,6 @@ def get_raw_data() -> tuple[UploadedFile | None, UploadedFile | None]:
     return source_data_raw, sink_data_raw
 
 
-def raw_to_df(raw_data: UploadedFile) -> pd.DataFrame:
-    df = pd.read_excel(raw_data, skiprows=1, header=None)
-    header = [f"Temperatur {i}" for i in range(int(len(df.columns) / 2))]
-    header.extend([f"Volumenstrom {i}" for i in range(int(len(df.columns) / 2))])
-    rename_dict = {
-        list(df.columns)[i]: new_header for (i, new_header) in enumerate(header)
-    }
-    df.rename(columns=rename_dict, inplace=True)
-    return df
-
-
 def display_vessel_widgets() -> Vessel:
     height = st.sidebar.number_input("Höhe in $m$", 0.0, 40.0, 8.0, 1.0)
     radius = st.sidebar.number_input("Radius in $m$", 0.0, 10.0, 2.0, 0.5)
@@ -67,10 +55,10 @@ def display_vessel_widgets() -> Vessel:
         "Anfangszustand", [value.value for value in InitialStateType]
     )
     initial_high_temp = st.sidebar.number_input(
-        "initiale Höchsttemperatur in $\degree C$", 0.0, 100.0, 70.0, 1.0
+        "initiale Höchsttemperatur in $\degree C$", 0.0, 100.0, 70.0, 1.0  # type: ignore
     )
     initial_low_temp = st.sidebar.number_input(
-        "initiale Niedertemperatur in $\degree C$", 0.0, 100.0, 20.0, 1.0
+        "initiale Niedertemperatur in $\degree C$", 0.0, 100.0, 20.0, 1.0  # type: ignore
     )
     vessel = Vessel(
         height=height,
@@ -107,7 +95,7 @@ def display_medium_widgets() -> Medium:
 def display_environment() -> Environment:
     st.sidebar.header("Umgebungsvariablen")
     env_temp = st.sidebar.number_input(
-        "Umgebungstemperatur $T_{\\text{ext}}$ in $\degree C$", value=20.0
+        "Umgebungstemperatur $T_{\\text{ext}}$ in $\degree C$", value=20.0  # type: ignore
     )
     env = Environment(env_temp=env_temp)
     return env
@@ -220,35 +208,51 @@ def get_dfs(
 
 
 def manipulate_source(header: str, original_df: pd.DataFrame) -> None:
-    st.session_state.edited_source[header] = original_df[header].apply(
+    st.session_state.edited_source[header] = original_df[header].apply(  # type: ignore
         lambda x: x * st.session_state.source_factor
     )
+    if re.search("Temperatur", st.session_state.source_select):
+        st.session_state.edited_source[header][
+            st.session_state.edited_source[header] > st.session_state.max_temp_source
+        ] = st.session_state.max_temp_source
+    else:
+        st.session_state.edited_source[header][
+            st.session_state.edited_source[header] > st.session_state.max_vol_source
+        ] = st.session_state.max_vol_source
 
 
 def manipulate_sink(header: str, original_df: pd.DataFrame) -> None:
-    st.session_state.edited_sink[header] = original_df[header].apply(
+    st.session_state.edited_sink[header] = original_df[header].apply(  # type: ignore
         lambda x: x * st.session_state.sink_factor
     )
+    if re.search("Temperatur", st.session_state.sink_select):
+        st.session_state.edited_sink[header][
+            st.session_state.edited_sink[header] > st.session_state.max_temp_sink
+        ] = st.session_state.max_temp_sink
+    else:
+        st.session_state.edited_source[header][
+            st.session_state.edited_source[header] > st.session_state.max_vol_sink
+        ] = st.session_state.max_vol_sink
 
 
 def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
     source_column, sink_column = st.columns(2, gap="medium")
     if not source_df.empty:
         with source_column:
-            st.write("**Quellen**")
+            st.write("**Quellen**")  # type: ignore
             with st.expander("Datenmanipulation"):
                 source_col3, source_col4 = st.columns([0.6, 0.4])
-                st.write(st.session_state.edited_source)
+                st.write(st.session_state.edited_source)  # type: ignore
                 with source_col3:
                     header_to_edit = st.selectbox(
                         "Datensatz wählen",
-                        [str(header) for header in source_df.columns],
+                        [str(header) for header in source_df.columns],  # type: ignore
                         key="source_select",
                     )
                 with source_col4:
                     current_source_factor = (
-                        st.session_state.edited_source[header_to_edit][0]
-                        / source_df[header_to_edit][0]
+                        st.session_state.edited_source[header_to_edit].min()
+                        / source_df[header_to_edit].min()
                     )
                     st.number_input(
                         "Faktor",
@@ -262,20 +266,28 @@ def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
                             source_df,
                         ),
                     )
+                    if re.search("Temperatur", st.session_state.source_select):
+                        st.number_input(
+                            "Maximale Temperatur", 1, 99, 85, 5, key="max_temp_source"
+                        )
+                    else:
+                        st.number_input(
+                            "Maximaler Volumenstrom", 1, 99, 50, 5, key="max_vol_source"
+                        )
             tab1_source, tab2_source = st.tabs(["Temperaturen", "Volumenströme"])
             source_temp_fig, source_vol_fig = plotly_raw_data(
                 st.session_state.edited_source
             )
             with tab1_source:
-                st.plotly_chart(source_temp_fig, use_container_width=True)
+                st.plotly_chart(source_temp_fig, use_container_width=True)  # type: ignore
             with tab2_source:
-                st.plotly_chart(source_vol_fig, use_container_width=True)
+                st.plotly_chart(source_vol_fig, use_container_width=True)  # type: ignore
     if not sink_df.empty:
         with sink_column:
-            st.write("**Senken**")
+            st.write("**Senken**")  # type: ignore
             with st.expander("Datenmanipulation"):
                 sink_col3, sink_col4 = st.columns([0.6, 0.4])
-                st.write(st.session_state.edited_sink)
+                st.write(st.session_state.edited_sink)  # type: ignore
                 with sink_col3:
                     header_to_edit_sink = st.selectbox(
                         "Datensatz wählen",
@@ -284,8 +296,8 @@ def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
                     )
                 with sink_col4:
                     current_sink_factor = (
-                        st.session_state.edited_sink[header_to_edit_sink][0]
-                        / sink_df[header_to_edit_sink][0]
+                        st.session_state.edited_sink[header_to_edit_sink].min()
+                        / sink_df[header_to_edit_sink].min()
                     )
                     st.number_input(
                         "Faktor",
@@ -299,62 +311,55 @@ def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
                             sink_df,
                         ),
                     )
+                    if re.search("Temperatur", st.session_state.sink_select):
+                        st.number_input(
+                            "Maximale Temperatur", 1, 99, 50, 5, key="max_temp_sink"
+                        )
+                    else:
+                        st.number_input(
+                            "Maximaler Volumenstrom", 1, 99, 50, 5, key="max_vol_sink"
+                        )
             tab1_sink, tab2_sink = st.tabs(["Temperaturen", "Volumenströme"])
             sink_temp_fig, sink_vol_fig = plotly_raw_data(st.session_state.edited_sink)
             with tab1_sink:
-                st.plotly_chart(sink_temp_fig, use_container_width=True)
+                st.plotly_chart(sink_temp_fig, use_container_width=True)  # type: ignore
             with tab2_sink:
-                st.plotly_chart(sink_vol_fig, use_container_width=True)
+                st.plotly_chart(sink_vol_fig, use_container_width=True)  # type: ignore
 
 
-def get_energy_consumption_data(power_cons: npt.NDArray[np.float64], delta_t: float):
-    energy_cons_cum = np.apply_along_axis(
-        lambda power: power_to_energy(power, delta_t), 0, power_cons
+def display_analysis_section(
+    heater_pow: npt.NDArray[np.float64],
+    cooler_power: npt.NDArray[np.float64],
+    time_delta: int,
+    flows: list[Flow],
+    base_result: npt.NDArray[np.float64],
+    num_sim_days: int,
+) -> None:
+    _, total_energy = get_energy_consumption_data(heater_pow, delta_t=int(time_delta))
+    _, cooler_energy_total = get_energy_consumption_data(
+        cooler_power, delta_t=int(time_delta)
     )
-    total_energy = np.sum(energy_cons_cum)
-    energy_cons_cum = np.cumsum(energy_cons_cum)
-    return energy_cons_cum, total_energy
-
-
-def get_in_out_energy_cons(
-    flows: list[Flow], vessel_state: npt.NDArray[np.float64]
-) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    source_energy = np.zeros(flows[0].flow_temp.shape)
-    sink_energy = np.zeros(source_energy.shape)
-    for flow in flows:
-        if flow.input_type == SimType.SOURCE:
-            source_energy += calc_flow_energy(
-                flow=flow, output_temp=vessel_state[-2, 1:]
-            )
-        else:
-            sink_energy += calc_flow_energy(flow=flow, output_temp=vessel_state[1, 1:])
-    return source_energy, sink_energy
-
-
-def calc_flow_energy(
-    flow: Flow, output_temp: npt.NDArray[np.float64]
-) -> npt.NDArray[np.float64]:
-    flow_power = np.zeros(output_temp.shape)
-    if flow.input_type == SimType.SOURCE:
-        for timestep, temp in enumerate(output_temp):
-            flow_power[timestep] = calc_mix_power(
-                mass_flow=flow.mass_flow_kg_s[timestep],
-                c_p_fluid=flow.medium.c_p,
-                high_temp=flow.flow_temp[timestep],
-                low_temp=temp,
-            )
-    else:
-        for timestep, temp in enumerate(output_temp):
-            flow_power[timestep] = calc_mix_power(
-                mass_flow=flow.mass_flow_kg_s[timestep],
-                c_p_fluid=flow.medium.c_p,
-                high_temp=temp,
-                low_temp=flow.flow_temp[timestep],
-            )
-    flow_energy = np.apply_along_axis(
-        lambda power: power_to_energy(power=power, delta_t=300), 0, flow_power
+    source_energy, sink_energy = get_in_out_energy_cons(
+        flows=flows, vessel_state=base_result
     )
-    return flow_energy
+    total_source_energy = source_energy.sum()  # type: ignore
+    total_sink_energy = sink_energy.sum()  # type: ignore
+    ana_col1, ana_col2, ana_col3, ana_col4, ana_col5 = st.columns(5)
+    with ana_col1:
+        st.metric("Energieverbrauch Quellen  \nin kWh", "%.2f" % total_source_energy)  # type: ignore
+        st.metric("Jahreshochrechnung  \nEnergieverbrauch Quellen  \nin MWh", "%.2f" % (float(total_source_energy) * 365 / num_sim_days / 1000))  # type: ignore
+    with ana_col2:
+        st.metric("Energieverbrauch Senken  \nin kWh", "%.2f" % total_sink_energy)  # type: ignore
+        st.metric("Jahreshochrechnung  \nEnergieverbrauch Senken  \nin MWh", "%.2f" % (float(total_sink_energy) * 365 / num_sim_days / 1000))  # type: ignore
+    with ana_col3:
+        st.metric("Differenz  \nin kWh", "%.2f" % abs(total_sink_energy - total_source_energy))  # type: ignore
+        st.metric("Jahreshochrechnung  \nDifferenz  \nin MWh", "%.2f" % (float(abs(total_sink_energy - total_source_energy) * 365 / num_sim_days / 1000)))  # type: ignore
+    with ana_col4:
+        st.metric("Energieverbrauch Spitzen-  \nlastheizung in kWh", "%.2f" % total_energy)  # type: ignore
+        st.metric("Jahreshochrechnung  \nEnergieverbrauch Spitzen-  \nin MWh", "%.2f" % (float(total_energy) * 365 / num_sim_days / 1000))  # type: ignore
+    with ana_col5:
+        st.metric("Energieverbrauch Notkühler  \nin kWh", "%.2f" % cooler_energy_total)  # type: ignore
+        st.metric("Jahreshochrechnung  \nEnergieverbrauch Notkühler  \nin MWh", "%.2f" % (float(cooler_energy_total) * 365 / num_sim_days / 1000))  # type: ignore
 
 
 def main():
@@ -373,6 +378,9 @@ def main():
         value=300,
         step=60,
         help="Was ist die Zeitdifferenz zwischen je zwei Messwerten im Datensatz.",
+    )
+    num_sim_days = st.sidebar.number_input(
+        "Anzahl der Messtage", min_value=1, value=7, step=1
     )
     st.sidebar.divider()
     st.sidebar.header("Behältermaße")
@@ -399,21 +407,26 @@ def main():
             turn_off_temp=turn_off,
             heating_temp=heating_temp,
         )
+        cooler_power = cooler_simulation(
+            layer=heater_result[-2, 1:],
+            desired_temp=desired_cooling_temp,
+            flows=flows,
+            c_p_fluid=medium.c_p,
+        )
         st.header("Heizfreie Simulation")
         result_fig = plot_sim_results(base_result)
-        st.plotly_chart(result_fig, use_container_width=True)
+        st.plotly_chart(result_fig, use_container_width=True)  # type: ignore
         st.header("Simulation mit Heizung")
-        _, total_energy = get_energy_consumption_data(
-            heater_pow, delta_t=int(time_delta)
-        )
-        st.metric("Energieverbrauch Spitzenlastheizung in kWh", "%.2f" % total_energy)
-        source_energy, sink_energy = get_in_out_energy_cons(
-            flows=flows, vessel_state=base_result
-        )
-        st.metric("Energieverbrauch Quellen in kWh", "%.2f" % source_energy.sum())
-        st.metric("Energieverbrauch Senken in kWh", "%.2f" % sink_energy.sum())
         heater_result_fig = plot_sim_results(heater_result)
-        st.plotly_chart(heater_result_fig, use_container_width=True)
+        st.plotly_chart(heater_result_fig, use_container_width=True)  # type: ignore
+        display_analysis_section(
+            heater_pow=heater_pow,
+            cooler_power=cooler_power,
+            time_delta=int(time_delta),
+            flows=flows,
+            base_result=base_result,
+            num_sim_days=int(num_sim_days),
+        )
 
 
 if __name__ == "__main__":
