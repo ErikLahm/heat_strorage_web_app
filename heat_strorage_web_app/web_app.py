@@ -268,11 +268,29 @@ def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
                     )
                     if re.search("Temperatur", st.session_state.source_select):
                         st.number_input(
-                            "Maximale Temperatur", 1, 99, 85, 5, key="max_temp_source"
+                            "Maximale Temperatur",
+                            1,
+                            99,
+                            85,
+                            5,
+                            key="max_temp_source",
+                            on_change=lambda: manipulate_source(
+                                str(header_to_edit),
+                                source_df,
+                            ),
                         )
                     else:
                         st.number_input(
-                            "Maximaler Volumenstrom", 1, 99, 50, 5, key="max_vol_source"
+                            "Maximaler Volumenstrom",
+                            1,
+                            99,
+                            50,
+                            5,
+                            key="max_vol_source",
+                            on_change=lambda: manipulate_source(
+                                str(header_to_edit),
+                                source_df,
+                            ),
                         )
             tab1_source, tab2_source = st.tabs(["Temperaturen", "Volumenströme"])
             source_temp_fig, source_vol_fig = plotly_raw_data(
@@ -313,11 +331,29 @@ def display_raw_data(source_df: pd.DataFrame, sink_df: pd.DataFrame) -> None:
                     )
                     if re.search("Temperatur", st.session_state.sink_select):
                         st.number_input(
-                            "Maximale Temperatur", 1, 99, 50, 5, key="max_temp_sink"
+                            "Maximale Temperatur",
+                            1,
+                            99,
+                            50,
+                            5,
+                            key="max_temp_sink",
+                            on_change=lambda: manipulate_sink(
+                                str(header_to_edit_sink),
+                                sink_df,
+                            ),
                         )
                     else:
                         st.number_input(
-                            "Maximaler Volumenstrom", 1, 99, 50, 5, key="max_vol_sink"
+                            "Maximaler Volumenstrom",
+                            1,
+                            99,
+                            50,
+                            5,
+                            key="max_vol_sink",
+                            on_change=lambda: manipulate_sink(
+                                str(header_to_edit_sink),
+                                sink_df,
+                            ),
                         )
             tab1_sink, tab2_sink = st.tabs(["Temperaturen", "Volumenströme"])
             sink_temp_fig, sink_vol_fig = plotly_raw_data(st.session_state.edited_sink)
