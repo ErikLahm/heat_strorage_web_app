@@ -48,17 +48,17 @@ def get_raw_data() -> tuple[UploadedFile | None, UploadedFile | None]:
 
 
 def display_vessel_widgets() -> Vessel:
-    height = st.sidebar.number_input("Höhe in $m$", 0.0, 40.0, 8.0, 1.0)
-    radius = st.sidebar.number_input("Radius in $m$", 0.0, 10.0, 2.0, 0.5)
+    height = st.sidebar.number_input("Höhe in $\\text{m}$", 0.0, 40.0, 8.0, 1.0)
+    radius = st.sidebar.number_input("Radius in $\\text{m}$", 0.0, 10.0, 2.0, 0.5)
     segmentation = st.sidebar.number_input("Segmentierung", 2, 20, 7, 1)
     initial_state = st.sidebar.selectbox(
         "Anfangszustand", [value.value for value in InitialStateType]
     )
     initial_high_temp = st.sidebar.number_input(
-        "initiale Höchsttemperatur in $\degree C$", 0.0, 100.0, 70.0, 1.0  # type: ignore
+        "initiale Höchsttemperatur in $\degree \\text{C}$", 0.0, 100.0, 70.0, 1.0  # type: ignore
     )
     initial_low_temp = st.sidebar.number_input(
-        "initiale Niedertemperatur in $\degree C$", 0.0, 100.0, 20.0, 1.0  # type: ignore
+        "initiale Niedertemperatur in $\degree \\text{C}$", 0.0, 100.0, 20.0, 1.0  # type: ignore
     )
     vessel = Vessel(
         height=height,
@@ -74,17 +74,17 @@ def display_vessel_widgets() -> Vessel:
 def display_medium_widgets() -> Medium:
     st.sidebar.header("Medium")
     density = st.sidebar.number_input(
-        "Dichte $\\varrho$ in $\\frac{kg}{m^3}$",
+        "Dichte $\\varrho$ in $\\frac{\\text{kg}}{\\text{m}^3}$",
         min_value=0.0,
         value=1000.0,
     )
     c_p = st.sidebar.number_input(
-        "Spezifische Wärmekapazität $c_p$ in $\\frac{J}{kg K}$",
+        "Spezifische Wärmekapazität $c_p$ in $\\frac{\\text{J}}{\\text{kg} \\text{K}}$",
         min_value=0.0,
         value=4184.0,
     )
     diffusivity = st.sidebar.number_input(
-        "Fluid Diffusivity $\\alpha$ in $\\frac{m^2}{s}(10^{-7})$",
+        "Fluid Diffusivity $\\alpha$ in $\\frac{\\text{m}^2}{\\text{s}}(10^{-7})$",
         min_value=0.0,
         value=1.43,
     )
@@ -95,7 +95,7 @@ def display_medium_widgets() -> Medium:
 def display_environment() -> Environment:
     st.sidebar.header("Umgebungsvariablen")
     env_temp = st.sidebar.number_input(
-        "Umgebungstemperatur $T_{\\text{ext}}$ in $\degree C$", value=20.0  # type: ignore
+        "Umgebungstemperatur $T_{\\text{ext}}$ in $\degree \\text{C}$", value=20.0  # type: ignore
     )
     env = Environment(env_temp=env_temp)
     return env
