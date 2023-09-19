@@ -405,6 +405,7 @@ def main():
         page_icon=":chart_with_downwards_trend:",
     )
     st.title(HEADER)
+    st.sidebar.image("heat_strorage_web_app/resources/emv_logo.png")
     st.sidebar.header("Datensatz Import")
     st.subheader("Rohdaten")
     source, sink = get_raw_data()
