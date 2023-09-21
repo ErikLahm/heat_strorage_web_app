@@ -287,7 +287,7 @@ def cooler_simulation(
                 cooler_power_consumption[i] += calc_mix_power(
                     flow.mass_flow_kg_s[i], c_p_fluid, temp, desired_temp
                 )
-    return cooler_power_consumption
+    return cooler_power_consumption.reshape((len(cooler_power_consumption), 1))
 
 
 SIMULATIONS = {

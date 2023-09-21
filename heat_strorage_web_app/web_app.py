@@ -24,7 +24,7 @@ from web_application.analysis_calcs import (
     raw_to_df,
 )
 from web_application.st_data_loader import df_to_np_temp_mass_array
-from web_application.st_plot import plot_sim_results, plotly_raw_data
+from web_application.st_plot import plot_power, plot_sim_results, plotly_raw_data
 
 HEADER = "Wärmespeicher Simulation"
 
@@ -456,6 +456,13 @@ def main():
         st.header("Simulation mit Heizung")
         heater_result_fig = plot_sim_results(heater_result)
         st.plotly_chart(heater_result_fig, use_container_width=True)  # type: ignore
+        st.plotly_chart(
+            plot_power(
+                [heater_pow, cooler_power],
+                ["Heizleistung", "Notkühlerleistung"],
+            ),
+            use_container_width=True,
+        )
         display_analysis_section(
             heater_pow=heater_pow,
             cooler_power=cooler_power,

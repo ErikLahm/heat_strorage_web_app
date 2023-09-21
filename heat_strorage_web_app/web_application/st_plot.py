@@ -21,7 +21,7 @@ def plotly_raw_data(raw_data: pd.DataFrame):
         volumes,
         labels=dict(
             index="Zeit in Zeitschritten",
-            value="Volumenströme",
+            value="Volumenströme in m^3/h",
         ),
     )
     return fig_temps, fig_volumes
@@ -31,7 +31,14 @@ def plot_sim_results(results: npt.NDArray[np.float64]):
     column_header = [f"Schicht {i}" for i in range(results.shape[0])]
     df = pd.DataFrame(results.T, columns=column_header)
     df.drop(columns=[df.columns[0], df.columns[-1]], inplace=True)
+    fig = px.line(df, labels=dict(index="Zeit in Zeitschritten", value="Temperatur"))
+    return fig
+
+
+def plot_power(powers: list[npt.NDArray[np.float64]], name: list[str]):
+    power_df = pd.DataFrame(np.concatenate(powers, axis=1), columns=name)
     fig = px.line(
-        df, labels=dict(index="Zeit in Zeitschritten", value="Speicherschichten")
+        power_df,
+        labels=dict(index="Zeit in Zeitschritten", value="Thermische Leistung in kW"),
     )
     return fig
