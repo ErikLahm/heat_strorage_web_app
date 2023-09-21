@@ -230,8 +230,8 @@ def manipulate_sink(header: str, original_df: pd.DataFrame) -> None:
             st.session_state.edited_sink[header] > st.session_state.max_temp_sink
         ] = st.session_state.max_temp_sink
     else:
-        st.session_state.edited_source[header][
-            st.session_state.edited_source[header] > st.session_state.max_vol_sink
+        st.session_state.edited_sink[header][
+            st.session_state.edited_sink[header] > st.session_state.max_vol_sink
         ] = st.session_state.max_vol_sink
 
 
