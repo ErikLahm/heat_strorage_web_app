@@ -2,6 +2,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 
 
 def plotly_raw_data(raw_data: pd.DataFrame):
@@ -41,4 +42,25 @@ def plot_power(powers: list[npt.NDArray[np.float64]], name: list[str]):
         power_df,
         labels=dict(index="Zeit in Zeitschritten", value="Thermische Leistung in kW"),
     )
+    return fig
+
+
+def plot_heatmap(base_solution: npt.NDArray[np.float64]):
+    base_solution = base_solution[1:-1, :]
+    base_solution = np.flipud(base_solution)
+    base_solution_3d = base_solution.reshape(
+        (base_solution.shape[0], 1, base_solution.shape[1])
+    )
+    fig = px.imshow(
+        img=base_solution_3d,
+        zmin=np.min(base_solution),
+        zmax=np.max(base_solution),
+        color_continuous_scale="RdBu_r",
+        origin="lower",
+        animation_frame=2,
+        aspect="auto",
+    )
+    fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 0.1
+    fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 0.01
+    fig.update_layout(title_text="Wärmespeicher Animation", xaxis=dict(range=[0, 0.2]))
     return fig

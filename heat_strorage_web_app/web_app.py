@@ -24,9 +24,12 @@ from web_application.analysis_calcs import (
     raw_to_df,
 )
 from web_application.st_data_loader import df_to_np_temp_mass_array
-from web_application.st_plot import plot_power, plot_sim_results, plotly_raw_data
-
-HEADER = "Wärmespeicher Simulation"
+from web_application.st_plot import (
+    plot_heatmap,
+    plot_power,
+    plot_sim_results,
+    plotly_raw_data,
+)
 
 Heater = tuple[float, float, float, float]
 
@@ -398,13 +401,27 @@ def display_analysis_section(
         st.metric("Jahreshochrechnung  \nEnergieverbrauch Notkühler  \nin MWh", "%.2f" % (float(cooler_energy_total) * 365 / num_sim_days / 1000))  # type: ignore
 
 
+def display_temp_results(
+    base_result: npt.NDArray[np.float64], heater_result: npt.NDArray[np.float64]
+):
+    tab_normal_sim, tab_heater_sim = st.tabs(
+        ["Simulation ohne Spitzenlastheizung", "Simulation mit Spitzenlastheizung"]
+    )
+    with tab_normal_sim:
+        result_fig = plot_sim_results(base_result)
+        st.plotly_chart(result_fig, use_container_width=True)  # type: ignore
+    with tab_heater_sim:
+        heater_result_fig = plot_sim_results(heater_result)
+        st.plotly_chart(heater_result_fig, use_container_width=True)  # type: ignore
+
+
 def main():
     st.set_page_config(
         page_title="Wärmespeicher Simulation",
         layout="wide",
         page_icon=":chart_with_downwards_trend:",
     )
-    st.title(HEADER)
+    st.title("Wärmespeicher Simulation")
     st.sidebar.image("heat_strorage_web_app/resources/emv_logo.png")
     st.sidebar.header("Datensatz Import")
     st.subheader("Rohdaten")
@@ -450,12 +467,9 @@ def main():
             flows=flows,
             c_p_fluid=medium.c_p,
         )
-        st.header("Heizfreie Simulation")
-        result_fig = plot_sim_results(base_result)
-        st.plotly_chart(result_fig, use_container_width=True)  # type: ignore
-        st.header("Simulation mit Heizung")
-        heater_result_fig = plot_sim_results(heater_result)
-        st.plotly_chart(heater_result_fig, use_container_width=True)  # type: ignore
+        display_temp_results(base_result=base_result, heater_result=heater_result)
+        heatmap_fig = plot_heatmap(base_solution=base_result)
+        st.plotly_chart(heatmap_fig)
         st.plotly_chart(
             plot_power(
                 [heater_pow, cooler_power],
