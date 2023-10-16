@@ -60,7 +60,10 @@ def plot_heatmap(base_solution: npt.NDArray[np.float64]):
         animation_frame=2,
         aspect="auto",
     )
-    fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 0.1
-    fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 0.01
-    fig.update_layout(title_text="Wärmespeicher Animation", xaxis=dict(range=[0, 0.2]))
+    fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 10
+    fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 5
+    fig.update_layout(
+        title_text="Wärmespeicher Animation",
+        xaxis=dict(visible=False, showticklabels=False),
+    )
     return fig
