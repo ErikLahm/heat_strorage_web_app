@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 from pde_calculations.flow import Flow
 from pde_calculations.heat_pde import HeatTransferEquation
+from pde_calculations.medium import Medium
 from pde_calculations.sim_enums import SimType
 
 
@@ -288,6 +289,49 @@ def cooler_simulation(
                     flow.mass_flow_kg_s[i], c_p_fluid, temp, desired_temp
                 )
     return cooler_power_consumption.reshape((len(cooler_power_consumption), 1))
+
+
+def get_source_power(
+    high_temp: npt.NDArray[np.float64],
+    low_temp: npt.NDArray[np.float64],
+    mass_flow: npt.NDArray[np.float64],
+    c_p: float,
+) -> npt.NDArray[np.float64]:
+    return np.array(
+        [
+            calc_mix_power(
+                mass_flow=inp[0], high_temp=inp[1], low_temp=inp[2], c_p_fluid=c_p
+            )
+            for inp in list(zip(mass_flow, high_temp, low_temp))
+        ]
+    )
+
+
+def get_outer_power_cons(
+    flows: list[Flow], medium: Medium, simulation_result: npt.NDArray[np.float64]
+) -> Tuple[list[npt.NDArray[np.float64]], list[npt.NDArray[np.float64]]]:
+    source_power: list[npt.NDArray[np.float64]] = []
+    sink_power: list[npt.NDArray[np.float64]] = []
+    for flow in flows:
+        if flow.input_type == SimType.SOURCE:
+            source_power.append(
+                get_source_power(
+                    high_temp=flow.flow_temp,
+                    low_temp=simulation_result[-2, :],
+                    mass_flow=flow.mass_flow_kg_s,
+                    c_p=medium.c_p,
+                ).reshape((len(flow.flow_temp), 1))
+            )
+        else:
+            sink_power.append(
+                get_source_power(
+                    high_temp=simulation_result[1, :],
+                    low_temp=flow.flow_temp,
+                    mass_flow=flow.mass_flow_kg_s,
+                    c_p=medium.c_p,
+                ).reshape((len(flow.flow_temp), 1))
+            )
+    return source_power, sink_power
 
 
 SIMULATIONS = {
