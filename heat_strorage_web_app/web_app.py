@@ -13,6 +13,7 @@ from pde_calculations.sim_enums import InitialStateType, SimType
 from pde_calculations.simulations import (
     base_simulation,
     cooler_simulation,
+    get_outer_power_cons,
     heater_simulation,
 )
 from pde_calculations.vessel import Vessel
@@ -468,8 +469,18 @@ def main():
             c_p_fluid=medium.c_p,
         )
         display_temp_results(base_result=base_result, heater_result=heater_result)
-        heatmap_fig = plot_heatmap(base_solution=base_result)
-        st.plotly_chart(heatmap_fig)
+        # heatmap_fig = plot_heatmap(base_solution=base_result)
+        # st.plotly_chart(heatmap_fig)
+        source_power, sink_power = get_outer_power_cons(
+            flows=flows, medium=medium, simulation_result=heater_result
+        )
+        labels = [f"Quellenleistung {i}" for i, _ in enumerate(source_power)]
+        labels.extend([f"Senkenleistung {i}" for i, _ in enumerate(sink_power)])
+        source_power.extend(sink_power)
+        st.plotly_chart(
+            plot_power(source_power, labels),
+            use_container_width=True,
+        )
         st.plotly_chart(
             plot_power(
                 [heater_pow, cooler_power],

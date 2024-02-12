@@ -31,7 +31,8 @@ def main() -> None:
         sim_type=SimType.SOURCE,
     )
     sink_data = RawDataLoader(
-        path="/Users/erikweilandt/Documents/emv/heat_storage_sim/src/main/resources/test_data_input.xlsx",
+        # path="/Users/erikweilandt/Documents/emv/heat_storage_sim/src/main/resources/test_data_input.xlsx",
+        path="/Users/erikweilandt/Downloads/TW-Erwärmung-Menge-Kaltwasser_Senke.xlsx",
         sheet_name="Wärmesenken",
         sim_type=SimType.SINK,
     )

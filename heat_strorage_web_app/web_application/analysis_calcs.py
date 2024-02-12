@@ -10,7 +10,7 @@ from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 
 def raw_to_df(raw_data: UploadedFile) -> pd.DataFrame:
-    df = pd.read_excel(raw_data, skiprows=1, header=None)  # type: ignore
+    df = pd.read_excel(raw_data, skiprows=1, header=None, dtype=np.float64)  # type: ignore
     header = [f"Temperatur {i}" for i in range(int(len(df.columns) / 2))]
     header.extend([f"Volumenstrom {i}" for i in range(int(len(df.columns) / 2))])
     rename_dict = {  # type: ignore
