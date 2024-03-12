@@ -4,9 +4,6 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
-  "python.linting.pylintEnabled": true,
-  "python.linting.enabled": true,
   "python.analysis.typeCheckingMode": "strict",
-  "python.formatting.provider": "black",
   "vim.smartRelativeLine": true
 }

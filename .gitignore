@@ -14,3 +14,4 @@ src/main/python/my_app/classes/__pycache__
 src/main/python/my_app/gui/__pycache__
 src/main/python/my_app/backend_calc/__pycache__
 heat_strorage_web_app/web_application/__pycache__
+heat_strorage_web_app/pde_calculations/__pycache__
