@@ -25,12 +25,7 @@ from web_application.analysis_calcs import (
     raw_to_df,
 )
 from web_application.st_data_loader import df_to_np_temp_mass_array
-from web_application.st_plot import (
-    plot_heatmap,
-    plot_power,
-    plot_sim_results,
-    plotly_raw_data,
-)
+from web_application.st_plot import plot_comparison, plot_sim_results, plotly_raw_data
 
 Heater = tuple[float, float, float, float]
 
@@ -451,7 +446,6 @@ def main():
     st.subheader("Simulationsergebnisse")
     flows = get_flows(medium=medium)
     pde = HeatTransferEquation(fluid=medium, vessel=vessel, env=env)
-    # if flows:
     if simulating:
         base_result = base_simulation(hte=pde, flows=flows, delta_t=int(time_delta))
         heater_flows = [copy.deepcopy(flow) for flow in flows]
@@ -471,25 +465,16 @@ def main():
             c_p_fluid=medium.c_p,
         )
         display_temp_results(base_result=base_result, heater_result=heater_result)
-        # heatmap_fig = plot_heatmap(base_solution=base_result)
-        # st.plotly_chart(heatmap_fig)
         source_power, sink_power = get_outer_power_cons(
             flows=flows, medium=medium, simulation_result=heater_result
         )
         labels = [f"Quellenleistung {i}" for i, _ in enumerate(source_power)]
         labels.extend([f"Senkenleistung {i}" for i, _ in enumerate(sink_power)])
         source_power.extend(sink_power)
-        st.plotly_chart(
-            plot_power(source_power, labels),
-            use_container_width=True,
+        comp_fig = plot_comparison(
+            source_power, labels, heater_power=heater_pow, cooler_power=cooler_power
         )
-        st.plotly_chart(
-            plot_power(
-                [heater_pow, cooler_power],
-                ["Heizleistung", "Notkühlerleistung"],
-            ),
-            use_container_width=True,
-        )
+        st.plotly_chart(comp_fig)
         display_analysis_section(
             heater_pow=heater_pow,
             cooler_power=cooler_power,

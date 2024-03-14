@@ -2,7 +2,9 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
+from plotly.subplots import make_subplots
 
 
 def plotly_raw_data(raw_data: pd.DataFrame):
@@ -66,4 +68,48 @@ def plot_heatmap(base_solution: npt.NDArray[np.float64]):
         title_text="Wärmespeicher Animation",
         xaxis=dict(visible=False, showticklabels=False),
     )
+    return fig
+
+
+def plot_comparison(
+    outer_powers: list[npt.NDArray[np.float64]],
+    outer_names: list[str],
+    cooler_power: npt.NDArray[np.float64],
+    heater_power: npt.NDArray[np.float64],
+):
+    fig = make_subplots(
+        rows=len(outer_powers) + 2, cols=1, shared_xaxes=True, vertical_spacing=0.05
+    )
+    i = 1
+    for power in outer_powers:
+        fig.add_trace(
+            go.Scatter(
+                x=list(range(len(power))),
+                y=power.flatten().tolist(),
+                name=outer_names[i - 1],
+            ),
+            row=i,
+            col=1,
+        )
+        i += 1
+    fig.add_trace(
+        go.Scatter(
+            x=list(range(len(cooler_power))),
+            y=cooler_power.flatten().tolist(),
+            name="Notkühlerleistung",
+        ),
+        row=len(outer_powers) + 1,
+        col=1,
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=list(range(len(heater_power))),
+            y=heater_power.flatten().tolist(),
+            name="Spitzlenlastheizung-Leistung",
+        ),
+        row=len(outer_powers) + 2,
+        col=1,
+    )
+
+    fig.update_layout(title_text="Vergleichsgrafik")
     return fig
