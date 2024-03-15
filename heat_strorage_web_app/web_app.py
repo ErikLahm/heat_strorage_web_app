@@ -208,7 +208,7 @@ def get_dfs(
 
 def manipulate_source(header: str, original_df: pd.DataFrame) -> None:
     st.session_state.edited_source[header] = original_df[header].apply(  # type: ignore
-        lambda x: x * st.session_state.source_factor
+        lambda x: x * st.session_state.source_facto  # type: ignore
     )
     if re.search("Temperatur", st.session_state.source_select):
         st.session_state.edited_source[header][
@@ -222,7 +222,7 @@ def manipulate_source(header: str, original_df: pd.DataFrame) -> None:
 
 def manipulate_sink(header: str, original_df: pd.DataFrame) -> None:
     st.session_state.edited_sink[header] = original_df[header].apply(  # type: ignore
-        lambda x: x * st.session_state.sink_factor
+        lambda x: x * st.session_state.sink_facto  # type: ignore
     )
     if re.search("Temperatur", st.session_state.sink_select):
         st.session_state.edited_sink[header][
