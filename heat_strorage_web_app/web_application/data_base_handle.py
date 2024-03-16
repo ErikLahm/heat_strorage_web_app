@@ -20,7 +20,7 @@ st.write(df)
 
 def update_entry():
     for param in Params:
-        st.session_state[param.value] = df[param.value][0]
+        st.write(st.session_state[param.value])  # = df[param.value][0]
 
 
 st.button("update_entry", on_click=update_entry)

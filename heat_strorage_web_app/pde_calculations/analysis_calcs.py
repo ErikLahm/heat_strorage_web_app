@@ -2,22 +2,11 @@ from typing import Tuple
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
 from pde_calculations.flow import Flow
 from pde_calculations.sim_enums import SimType
 from pde_calculations.simulations import calc_mix_power, power_to_energy
-from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-
-def raw_to_df(raw_data: UploadedFile) -> pd.DataFrame:
-    df = pd.read_excel(raw_data, skiprows=1, header=None, dtype=np.float64)  # type: ignore
-    header = [f"Temperatur {i}" for i in range(int(len(df.columns) / 2))]
-    header.extend([f"Volumenstrom {i}" for i in range(int(len(df.columns) / 2))])
-    rename_dict = {  # type: ignore
-        list(df.columns)[i]: new_header for (i, new_header) in enumerate(header)
-    }
-    df.rename(columns=rename_dict, inplace=True)  # type: ignore
-    return df
+from heat_strorage_web_app.pde_calculations.medium import Medium
 
 
 def get_energy_consumption_data(
@@ -41,7 +30,7 @@ def get_energy_consumption_data(
     """
 
     energy_cons_cum = np.apply_along_axis(
-        lambda power: power_to_energy(power, delta_t), 0, power_cons
+        lambda power: power_to_energy(power, delta_t), 0, power_cons  # type: ignore
     )
     total_energy = np.sum(energy_cons_cum)  # type: ignore
     energy_cons_cum = np.cumsum(energy_cons_cum)
@@ -113,6 +102,49 @@ def calc_flow_energy(
                 low_temp=flow.flow_temp[timestep],
             )
     flow_energy = np.apply_along_axis(
-        lambda power: power_to_energy(power=power, delta_t=300), 0, flow_power
+        lambda power: power_to_energy(power=power, delta_t=300), 0, flow_power  # type: ignore
     )
     return flow_energy
+
+
+def get_outer_power_cons(
+    flows: list[Flow], medium: Medium, simulation_result: npt.NDArray[np.float64]
+) -> Tuple[list[npt.NDArray[np.float64]], list[npt.NDArray[np.float64]]]:
+    source_power: list[npt.NDArray[np.float64]] = []
+    sink_power: list[npt.NDArray[np.float64]] = []
+    for flow in flows:
+        if flow.input_type == SimType.SOURCE:
+            source_power.append(
+                get_source_power(
+                    high_temp=flow.flow_temp,
+                    low_temp=simulation_result[-2, :],
+                    mass_flow=flow.mass_flow_kg_s,
+                    c_p=medium.c_p,
+                ).reshape((len(flow.flow_temp), 1))
+            )
+        else:
+            sink_power.append(
+                get_source_power(
+                    high_temp=simulation_result[1, :],
+                    low_temp=flow.flow_temp,
+                    mass_flow=flow.mass_flow_kg_s,
+                    c_p=medium.c_p,
+                ).reshape((len(flow.flow_temp), 1))
+            )
+    return source_power, sink_power
+
+
+def get_source_power(
+    high_temp: npt.NDArray[np.float64],
+    low_temp: npt.NDArray[np.float64],
+    mass_flow: npt.NDArray[np.float64],
+    c_p: float,
+) -> npt.NDArray[np.float64]:
+    return np.array(
+        [
+            calc_mix_power(
+                mass_flow=inp[0], high_temp=inp[1], low_temp=inp[2], c_p_fluid=c_p
+            )
+            for inp in list(zip(mass_flow, high_temp, low_temp))
+        ]
+    )
