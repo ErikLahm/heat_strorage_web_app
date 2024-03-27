@@ -1,11 +1,12 @@
 import streamlit as st
 from pde_calculations.sim_enums import InitialStateType
-from web_application.param_enums import Params
+from web_application.param_enums import ParamDefaultChoices, Params
 
 
 def build_sidebar():
     display_sidebar_head()
     get_raw_data()
+    display_parameter_load_section()
     display_data_features()
     st.sidebar.divider()
     display_vessel_widgets()
@@ -19,6 +20,21 @@ def build_sidebar():
 def display_sidebar_head():
     st.sidebar.image("heat_strorage_web_app/resources/emv_logo.png")
     st.sidebar.header("Datensatz Import")
+
+
+def display_parameter_load_section():
+    st.sidebar.selectbox(
+        label="Parametersatz Auswahl",
+        options=[option.value for option in ParamDefaultChoices],
+        key="parameter_choice",
+    )
+    if st.session_state.parameter_choice != ParamDefaultChoices.NEW_SET.value:
+        st.sidebar.button(label="Anwenden")
+    if st.session_state.parameter_choice == ParamDefaultChoices.NEW_SET.value:
+        st.sidebar.text_input(
+            label="Name des neuen Parametersatzes", key="name_param_choice"
+        )
+        st.sidebar.button(label="Speichern")
 
 
 def display_data_features():

@@ -19,3 +19,7 @@ class Params(Enum):
     HEAT_GOAL_T = "heat_goal_t"
     HEAT_T = "heat_t"
     COOLER_GOAL_T = "cooler_goal_t"
+
+class ParamDefaultChoices(Enum):
+    DEFAULT_DASH = '-'
+    NEW_SET = 'Neuen Parametersatz speichern'
