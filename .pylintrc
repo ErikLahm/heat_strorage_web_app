@@ -1,8 +1,7 @@
 [MASTER]
+# https://stackoverflow.com/questions/1899436/pylint-unable-to-import-error-how-to-set-pythonpath
 init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
 docstring-min-length=10
 disable=missing-function-docstring,missing-class-docstring,missing-module-docstring
-extension-pkg-whitelist=PyQt6
-init-hook='import sys; sys.path.append("src/main/python/my_app")'
 [Format]
 good-names=x,y,i,j
