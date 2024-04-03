@@ -8,10 +8,6 @@ from pde_calculations.sim_enums import InitialStateType
 from web_application.param_enums import ParamDefaultChoices, Params
 
 
-def update_session_state(state_name: str, value: int | str | float) -> None:
-    st.session_state[state_name] = value
-
-
 def build_sidebar():
     display_sidebar_head()
     get_raw_data()
