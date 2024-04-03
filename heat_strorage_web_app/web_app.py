@@ -9,14 +9,6 @@ from heat_strorage_web_app.web_application.backend_connection import (
 )
 from heat_strorage_web_app.web_application.result_section import display_result_section
 
-import sys
-from pathlib import Path
-
-# Ensure the app directory is in the Python path
-app_dir = Path(__file__).parent.resolve()
-if str(app_dir) not in sys.path:
-    sys.path.append(str(app_dir))
-
 
 def main():
     st.set_page_config(

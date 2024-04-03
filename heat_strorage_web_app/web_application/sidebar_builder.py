@@ -1,9 +1,9 @@
 import streamlit as st
-from heat_strorage_web_app.web_application.backend_connection import (
+from web_application.backend_connection import (
     get_parameter_data,
     set_parameter_data,
 )
-from heat_strorage_web_app.web_application.data_base_handle import ParamDataBase
+from web_application.data_base_handle import ParamDataBase
 from pde_calculations.sim_enums import InitialStateType
 from web_application.param_enums import ParamDefaultChoices, Params
 
