@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import streamlit as st
-from pde_calculations.sim_enums import SimType
+from pde_calculations.sim_enums import InitialStateType, SimType
 from web_application.param_enums import Params
 
 from heat_strorage_web_app.pde_calculations.analysis_calcs import (
@@ -161,3 +161,25 @@ def get_source_sink_power_consumption(simulation_result: npt.NDArray[np.float64]
         flows=flows, medium=medium, simulation_result=simulation_result
     )
     return source_power, sink_power
+
+
+def get_parameter_data() -> dict[str, list[str | int | float]]:
+    param_dict: dict[str, list[str | int | float]] = {}
+    for param in Params:
+        param_dict[param.value] = [st.session_state[param.value]]
+    return param_dict
+
+
+def get_init_state_idx(init_state: str) -> int:
+    init_state_list = [state.value for state in InitialStateType]
+    return init_state_list.index(init_state)
+
+
+def set_parameter_data(param_dict: dict[str, list[str | int | float]]) -> None:
+    for param in Params:
+        if param.value == Params.INIT_STATE.value:
+            st.session_state.init_state_idx = get_init_state_idx(
+                str(param_dict[param.value][0])
+            )
+        else:
+            st.session_state[param.value] = param_dict[param.value][0]
