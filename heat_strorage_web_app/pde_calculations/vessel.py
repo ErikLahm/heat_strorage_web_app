@@ -20,7 +20,7 @@ class Vessel:
     radius: float
     segmentation: int
     theta: float = 0.5  # Verhältnis von einem Segmentvolumen zu zwei Segmentvolumina
-    initial_state: InitialStateType = InitialStateType.EVEN_DISTRIBUTION
+    initial_state: str = InitialStateType.EVEN_DISTRIBUTION.value
     min_value: float = 20
     max_value: float = 80
     init_state: npt.NDArray[np.float64] = field(init=False)
@@ -28,11 +28,11 @@ class Vessel:
 
     def __post_init__(self):
         match self.initial_state:
-            case InitialStateType.EVEN_DISTRIBUTION:
+            case InitialStateType.EVEN_DISTRIBUTION.value:
                 self.init_state = even_distribution(
                     self.min_value, self.max_value, self.segmentation
                 )
-            case InitialStateType.CONSTANT_DISTRIBUTION:
+            case InitialStateType.CONSTANT_DISTRIBUTION.value:
                 self.init_state = np.full(
                     shape=(self.segmentation + 2, 1), fill_value=self.max_value
                 )
