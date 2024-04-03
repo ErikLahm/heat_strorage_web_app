@@ -2,12 +2,12 @@ import streamlit as st
 from web_application.raw_data_section import display_raw_data_section
 from web_application.sidebar_builder import build_sidebar
 
-from heat_strorage_web_app.web_application.backend_connection import (
+from web_application.backend_connection import (
     get_base_simulation_results,
     get_cooler_simulation_results,
     get_heater_simulation_results,
 )
-from heat_strorage_web_app.web_application.result_section import display_result_section
+from web_application.result_section import display_result_section
 
 
 def main():
