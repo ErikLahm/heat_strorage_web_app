@@ -5,22 +5,45 @@ from streamlit_gsheets import GSheetsConnection
 from heat_strorage_web_app.web_application.param_enums import Params
 
 
-CONN = st.connection("gsheets", type=GSheetsConnection)
+DTYPEMAP = {
+    Params.DELTA_T.value: "int",
+    Params.DAYS.value: "int",
+    Params.HEIGHT.value: "float",
+    Params.RADIUS.value: "float",
+    Params.NUM_SEGS.value: "int",
+    Params.INIT_STATE.value: "str",
+    Params.INIT_MAX_T.value: "float",
+    Params.INIT_MIN_T.value: "float",
+    Params.DENSITY.value: "float",
+    Params.C_P.value: "float",
+    Params.DIFFUSIVITY.value: "float",
+    Params.T_ENV.value: "float",
+    Params.HEAT_PERC.value: "float",
+    Params.HEAT_CRIT_T.value: "float",
+    Params.HEAT_GOAL_T.value: "float",
+    Params.HEAT_T.value: "float",
+    Params.COOLER_GOAL_T.value: "float",
+}
 
 
 class ParamDataBase:
     def __init__(self) -> None:
+        self.conn = st.connection("gsheets", type=GSheetsConnection)
         self.database_df = self.read_database()
 
     def df(self) -> pd.DataFrame:
         return self.database_df
 
     def read_database(self) -> pd.DataFrame:
-        df = CONN.read(usecols=list(range(len(Params) + 1)), ttl=0).dropna(how="all")
+        df = self.conn.read(
+            usecols=list(range(len(Params) + 1)),
+            ttl=0,
+        ).dropna(how="all")
+        df = df.astype(DTYPEMAP)
         return df
 
     def update_database(self) -> None:
-        CONN.update(worksheet="simulation_parameter", data=self.database_df)
+        self.conn.update(worksheet="simulation_parameter", data=self.database_df)
 
     def set_name_exists(self, set_name: str) -> bool:
         set_list = self.get_set_names()
@@ -38,6 +61,7 @@ class ParamDataBase:
 
         """
         if not self.set_name_exists(set_name=set_name):
+            param_set["name"] = [set_name]
             self.database_df = pd.concat(
                 [self.database_df, pd.DataFrame(param_set)], axis=0
             )
@@ -66,35 +90,3 @@ class ParamDataBase:
         param_set = self.database_df.loc[self.database_df["name"] == set_name]
         # return param_set.to_dict()
         return param_set.to_dict("list")
-
-
-test = ParamDataBase()
-
-test2 = {
-    "name": ["test4"],
-    "delta_t": [30],
-    "days": [5],
-    "height": [2],
-    "radius": [0.5],
-    "n_segments": [3],
-    "init_state": ["linear"],
-    "init_max_t": [70],
-    "init_min_t": [20],
-    "density": [1000],
-    "c_p": [4184],
-    "diffusivity": [1.43],
-    "t_env": [20],
-    "heat_perc": [0.2],
-    "heat_crit_t": [60],
-    "heat_goal_t": [80],
-    "heat_t": [85],
-    "cooler_goal_t": [30],
-}
-st.write(test.df())
-names = test.df()["name"].tolist()
-st.write(names)
-st.write(test.get_param_set("test"))
-st.write(pd.DataFrame.from_dict(test2))
-st.button(label="remove test2", on_click=lambda: test.remove_set("test2"))
-st.button(label="add test2", on_click=lambda: test.append_set("test2", test2))
-st.write(test.df())
