@@ -6,7 +6,7 @@ from pde_calculations.flow import Flow
 from pde_calculations.sim_enums import SimType
 from pde_calculations.simulations import calc_mix_power, power_to_energy
 
-from heat_strorage_web_app.pde_calculations.medium import Medium
+from pde_calculations.medium import Medium
 
 
 def get_energy_consumption_data(
