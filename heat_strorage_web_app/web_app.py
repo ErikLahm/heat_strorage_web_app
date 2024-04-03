@@ -8,11 +8,14 @@ from heat_strorage_web_app.web_application.backend_connection import (
     get_heater_simulation_results,
 )
 from heat_strorage_web_app.web_application.result_section import display_result_section
+
+import sys
 from pathlib import Path
 
-path = Path(
-    __file__
-).parent.resolve()  # get the path to the folder that the current file is in
+# Ensure the app directory is in the Python path
+app_dir = Path(__file__).parent.resolve()
+if str(app_dir) not in sys.path:
+    sys.path.append(str(app_dir))
 
 
 def main():
