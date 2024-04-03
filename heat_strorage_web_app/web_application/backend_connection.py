@@ -7,21 +7,21 @@ import streamlit as st
 from pde_calculations.sim_enums import InitialStateType, SimType
 from web_application.param_enums import Params
 
-from heat_strorage_web_app.pde_calculations.analysis_calcs import (
+from pde_calculations.analysis_calcs import (
     get_energy_consumption_data,
     get_in_out_energy_cons,
     get_outer_power_cons,
 )
-from heat_strorage_web_app.pde_calculations.environment import Environment
-from heat_strorage_web_app.pde_calculations.flow import Flow
-from heat_strorage_web_app.pde_calculations.heat_pde import HeatTransferEquation
-from heat_strorage_web_app.pde_calculations.medium import Medium
-from heat_strorage_web_app.pde_calculations.simulations import (
+from pde_calculations.environment import Environment
+from pde_calculations.flow import Flow
+from pde_calculations.heat_pde import HeatTransferEquation
+from pde_calculations.medium import Medium
+from pde_calculations.simulations import (
     base_simulation,
     cooler_simulation,
     heater_simulation,
 )
-from heat_strorage_web_app.pde_calculations.vessel import Vessel
+from pde_calculations.vessel import Vessel
 
 
 def df_to_np_temp_mass_array(

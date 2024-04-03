@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 
-from heat_strorage_web_app.web_application.param_enums import Params
+from web_application.param_enums import Params
 
 
 DTYPEMAP = {

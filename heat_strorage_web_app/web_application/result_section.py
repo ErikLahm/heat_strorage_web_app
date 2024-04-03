@@ -2,12 +2,12 @@ import numpy as np
 import numpy.typing as npt
 import streamlit as st
 
-from heat_strorage_web_app.web_application.backend_connection import (
+from web_application.backend_connection import (
     get_analysis_results,
     get_source_sink_power_consumption,
 )
-from heat_strorage_web_app.web_application.param_enums import Params
-from heat_strorage_web_app.web_application.st_plot import (
+from web_application.param_enums import Params
+from web_application.st_plot import (
     plot_comparison,
     plot_sim_results,
 )
