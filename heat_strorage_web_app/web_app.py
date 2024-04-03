@@ -8,6 +8,11 @@ from heat_strorage_web_app.web_application.backend_connection import (
     get_heater_simulation_results,
 )
 from heat_strorage_web_app.web_application.result_section import display_result_section
+from pathlib import Path
+
+path = Path(
+    __file__
+).parent.resolve()  # get the path to the folder that the current file is in
 
 
 def main():
