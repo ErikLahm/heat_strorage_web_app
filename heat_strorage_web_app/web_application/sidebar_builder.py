@@ -81,10 +81,16 @@ def display_data_features():
 
 def get_raw_data():
     source_data_raw = st.sidebar.file_uploader(
-        "Quellen laden", type=["xlsx"], help="Datensatz wählen", key="source_data_raw"
+        "Quellen laden",
+        type=["xlsx"],
+        help="Datensatz wählen",
+        key="source_data_raw",
     )
     sink_data_raw = st.sidebar.file_uploader(
-        "Senken laden", type=["xlsx"], help="Senken laden", key="sink_data_raw"
+        "Senken laden",
+        type=["xlsx"],
+        help="Senken laden",
+        key="sink_data_raw",
     )
     if not (source_data_raw or sink_data_raw):
         st.error("Bitte mindestens einen Datensatz hochladen.")

@@ -54,7 +54,7 @@ def display_comparison(
     comp_fig = plot_comparison(
         source_power, labels, heater_power=heater_power, cooler_power=cooler_power
     )
-    st.plotly_chart(comp_fig)  # type:ignore
+    st.plotly_chart(comp_fig, use_container_width=True)  # type:ignore
 
 
 def display_analysis_section(
